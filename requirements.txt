@@ -1,6 +1,10 @@
 # IE 420 – Real-Time Portfolio VaR Monitoring System
 # Install with: pip install -r requirements.txt
 
+# Live dashboard extras
+dash-bootstrap-components>=1.5
+python-dotenv>=1.0
+
 # Core numerical / data
 numpy>=1.24
 pandas>=2.0

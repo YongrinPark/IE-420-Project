@@ -40,12 +40,12 @@ import config
 # Data loading helpers
 # ---------------------------------------------------------------------------
 
-def _load(filename: str, directory: str = None) -> pd.DataFrame:
+def _load(filename: str, directory: str = None, index_col=0) -> pd.DataFrame:
     directory = directory or config.DATA_PROCESSED
     path = os.path.join(directory, filename)
     if not os.path.exists(path):
         return pd.DataFrame()
-    return pd.read_csv(path, index_col=0, parse_dates=True)
+    return pd.read_csv(path, index_col=index_col, parse_dates=True)
 
 
 # ---------------------------------------------------------------------------
@@ -155,8 +155,8 @@ def create_app() -> dash.Dash:
     def update_all(_n):
         var_df  = _load("var_results.csv")
         back_df = _load("backtest_series.csv")
-        lat_df  = _load("latency_summary.csv", config.RESULTS_TABLES)
-        bt_sum  = _load("backtesting_summary.csv", config.RESULTS_TABLES)
+        lat_df  = _load("latency_summary.csv", config.RESULTS_TABLES, index_col=None)
+        bt_sum  = _load("backtesting_summary.csv", config.RESULTS_TABLES, index_col=None)
         mc_df   = _load("mc_var_results.csv")
 
         # ---- 1. Portfolio value ----------------------------------------

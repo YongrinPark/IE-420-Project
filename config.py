@@ -48,6 +48,17 @@ MARKET_OPEN  = "09:30"
 MARKET_CLOSE = "16:00"
 
 # ---------------------------------------------------------------------------
+# Live / Real-time settings
+# ---------------------------------------------------------------------------
+# Get a free API key at https://finnhub.io  (no credit card required)
+# Set it as environment variable:  export FINNHUB_API_KEY="your_key"
+# Or create a .env file in the project root (see .env.example)
+import os as _os
+FINNHUB_API_KEY   = _os.environ.get("FINNHUB_API_KEY", "")
+LIVE_INTERVAL_SEC = 60          # price fetch interval (seconds)
+LIVE_MC_EVERY_N   = 5           # run MC VaR every N live updates
+
+# ---------------------------------------------------------------------------
 # Filesystem paths  (derived from this file's location = project root)
 # ---------------------------------------------------------------------------
 BASE_DIR         = os.path.dirname(os.path.abspath(__file__))
