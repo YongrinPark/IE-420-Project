@@ -1,4 +1,4 @@
-# Secrets
-*.txt
-*token*
-*secret*
+# Secrets – only block actual credential files
+github_token.txt
+*_token.txt
+*_secret.txt
