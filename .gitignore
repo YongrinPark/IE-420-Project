@@ -2,3 +2,8 @@
 github_token.txt
 *_token.txt
 *_secret.txt
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo

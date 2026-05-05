@@ -39,7 +39,7 @@ MC_RANDOM_SEED = 42                # reproducibility
 # ---------------------------------------------------------------------------
 DAILY_START = "2022-01-01"         # start of daily historical window
 DAILY_END   = "2024-12-31"         # end   of daily historical window
-INTRADAY_DATE = "2024-12-10"       # single day used for intraday replay
+INTRADAY_DATE = "2026-05-01"       # single day used for intraday replay
 
 # ---------------------------------------------------------------------------
 # Trading hours (US Eastern, 24-h format)
