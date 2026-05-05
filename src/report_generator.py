@@ -26,6 +26,23 @@ import config
 # LaTeX table generators
 # ---------------------------------------------------------------------------
 
+def _escape(text: str) -> str:
+    """Escape special LaTeX characters in plain-text strings.
+    Backslash must be replaced first to avoid double-escaping."""
+    # Order matters: backslash first, then everything else
+    text = text.replace("\\", r"\textbackslash{}")
+    text = text.replace("&",  r"\&")
+    text = text.replace("%",  r"\%")
+    text = text.replace("$",  r"\$")
+    text = text.replace("#",  r"\#")
+    text = text.replace("^",  r"\^{}")
+    text = text.replace("{",  r"\{")
+    text = text.replace("}",  r"\}")
+    text = text.replace("~",  r"\textasciitilde{}")
+    text = text.replace("_",  r"\_")
+    return text
+
+
 def _df_to_latex(
     df: pd.DataFrame,
     caption: str,
@@ -51,16 +68,20 @@ def _df_to_latex(
         Complete LaTeX table environment.
     """
     col_spec = "l" + "r" * len(df.columns)
-    header   = " & ".join([""] + list(df.columns)) + r" \\"
+    # Escape underscores and other special chars in column names
+    escaped_cols = [_escape(str(c)) for c in df.columns]
+    header = " & ".join([""] + escaped_cols) + r" \\"
 
     rows = []
     for idx, row in df.iterrows():
-        cells = [str(idx)]
+        cells = [_escape(str(idx))]
         for val in row:
             if isinstance(val, float):
                 cells.append(float_fmt.format(val))
+            elif isinstance(val, bool):
+                cells.append("Yes" if val else "No")
             else:
-                cells.append(str(val))
+                cells.append(_escape(str(val)))
         rows.append(" & ".join(cells) + r" \\")
 
     body = "\n    ".join(rows)
@@ -153,12 +174,21 @@ def generate_model_comparison_table(model_csv: str = None) -> str:
     )
     _check_file(model_csv)
 
-    df = pd.read_csv(model_csv, index_col=0)
+    df = pd.read_csv(model_csv)
+    df = df.rename(columns={
+        "n_paths":           "Paths (M)",
+        "var_95_mc":         "MC VaR 95% ($)",
+        "var_99_mc":         "MC VaR 99% ($)",
+        "var_95_parametric": "Param VaR 95% ($)",
+        "var_99_parametric": "Param VaR 99% ($)",
+        "latency_ms":        "Latency (ms)",
+    }).set_index("Paths (M)")
 
     latex = _df_to_latex(
         df,
-        caption="Model comparison: average VaR estimates across methods.",
+        caption="Monte Carlo VaR vs parametric VaR and latency per path count.",
         label="tab:model_comparison",
+        float_fmt="{:.2f}",
     )
     _save_tex(latex, "model_comparison_table.tex")
     return latex

@@ -5,10 +5,11 @@
 % =============================================================================
 \documentclass[12pt, a4paper]{article}
 
-% --- Encoding & fonts --------------------------------------------------------
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage{lmodern}
+% --- Encoding & fonts (XeTeX/tectonic compatible) ----------------------------
+\usepackage{fontspec}
+\setmainfont{DejaVu Serif}
+\setsansfont{DejaVu Sans}
+\setmonofont{DejaVu Sans Mono}
 
 % --- Page layout -------------------------------------------------------------
 \usepackage[top=1in, bottom=1in, left=1.25in, right=1.25in]{geometry}

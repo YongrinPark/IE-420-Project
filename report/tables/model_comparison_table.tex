@@ -1,14 +1,14 @@
 \begin{table}[H]
     \centering
-    \caption{Model comparison: average VaR estimates across methods.}
+    \caption{Monte Carlo VaR vs parametric VaR and latency per path count.}
     \label{tab:model_comparison}
     \begin{tabular}{lrrrrr}
         \toprule
-         & var_95_mc & var_99_mc & var_95_parametric & var_99_parametric & latency_ms \\
+         & MC VaR 95\% (\$) & MC VaR 99\% (\$) & Param VaR 95\% (\$) & Param VaR 99\% (\$) & Latency (ms) \\
         \midrule
-        1000 & 2208.2048 & 3021.2841 & 2119.1547 & 2997.1609 & 0.4669 \\
-    5000 & 2126.2835 & 2828.6013 & 2119.1547 & 2997.1609 & 0.9031 \\
-    10000 & 2084.3280 & 2935.9794 & 2119.1547 & 2997.1609 & 1.6140 \\
+        1000 & 2208.20 & 3021.28 & 2119.15 & 2997.16 & 0.47 \\
+    5000 & 2126.28 & 2828.60 & 2119.15 & 2997.16 & 0.90 \\
+    10000 & 2084.33 & 2935.98 & 2119.15 & 2997.16 & 1.61 \\
         \bottomrule
     \end{tabular}
 \end{table}
