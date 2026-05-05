@@ -1,0 +1,4 @@
+# Secrets
+*.txt
+*token*
+*secret*
