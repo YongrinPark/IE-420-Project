@@ -33,7 +33,7 @@
 |---|---|---|---|
 | **Parametric VaR (Rolling)** | ⚡ 매우 빠름 (~0.2ms) | 보통 | 과거 252일 수익률 평균 사용 |
 | **Parametric VaR (EWMA)** | ⚡ 매우 빠름 (~0.16ms) | 조금 더 좋음 | 최근 데이터에 더 가중치 부여 |
-| **Monte Carlo VaR** | 🐢 상대적으로 느림 (~1.3ms) | 가장 유연함 | 10,000번 시뮬레이션 |
+| **Monte Carlo VaR** | 🐢 상대적으로 느림 (~1.5ms) | 가장 유연함 | 10,000번 시뮬레이션 |
 
 > **결론:** 빠를수록 가정이 많고, 정확할수록 계산이 오래 걸린다.  
 > 이 트레이드오프를 숫자로 증명하는 것이 이 프로젝트의 목표입니다.
@@ -161,8 +161,9 @@ IE 420 Project/
 ├── 📄 config.py              ← 모든 설정값이 여기 있어요 (첫 번째로 볼 파일)
 ├── 📄 requirements.txt       ← 설치해야 할 파이썬 패키지 목록
 ├── 📄 run_pipeline.py        ← 전체 파이프라인 한 번에 실행하는 스크립트
+├── 📄 run_live.py            ← 실시간 VaR 대시보드 실행 스크립트
 ├── 📄 README.md              ← 영어 설명서
-├── 📄 친절한한국어설명.md     ← 지금 이 파일!
+├── 📄 koreanexplanation_For_later_use.md ← 지금 이 파일!
 │
 ├── 📁 data/
 │   ├── raw/                  ← 야후 파이낸스에서 다운받은 원본 데이터
@@ -185,6 +186,9 @@ IE 420 Project/
 │   ├── backtesting.py        ← VaR 위반 분석 + Kupiec 테스트
 │   ├── latency.py            ← 계산 속도 측정 유틸리티
 │   ├── dashboard.py          ← Plotly/Dash 대시보드
+│   ├── live_data.py          ← Finnhub/yfinance 실시간 가격 수신
+│   ├── live_engine.py        ← 실시간 VaR 계산 엔진
+│   ├── live_dashboard.py     ← 실시간 Plotly/Dash 대시보드
 │   ├── report_generator.py   ← CSV 결과를 LaTeX 표로 변환
 │   └── utils.py              ← 기타 헬퍼 함수들
 │
@@ -270,12 +274,12 @@ PRIMARY_CONFIDENCE = 0.99    # 주 VaR 신뢰수준 99%
 
 ### `src/monte_carlo_var.py` — 정교하지만 느린 VaR
 ```
-경로수 1,000개  → VaR $3,021  (0.47ms)
-경로수 5,000개  → VaR $2,829  (0.90ms)
-경로수 10,000개 → VaR $2,936  (1.61ms)
+경로수 1,000개  → VaR $3,021  (1.75ms)
+경로수 5,000개  → VaR $2,829  (0.78ms)
+경로수 10,000개 → VaR $2,936  (1.53ms)
 ```
 경로 수가 많을수록 안정적인 결과가 나오지만 시간이 더 걸립니다.  
-Parametric VaR(~0.2ms)보다 **약 7~8배 느리지만**, 1.6ms도 실용적으로 충분히 빠릅니다.
+Parametric VaR(~0.2ms)보다 **몇 배 느리지만**, 약 1~2ms 수준이라 실용적으로 충분히 빠릅니다.
 
 ---
 
@@ -385,9 +389,9 @@ cd report
 |---|---|---|
 | Parametric (Rolling) | $2,993 | 0.19 ms |
 | Parametric (EWMA) | $2,489 | 0.16 ms |
-| Monte Carlo 1k | $3,021 | 0.47 ms |
-| Monte Carlo 5k | $2,829 | 0.90 ms |
-| Monte Carlo 10k | $2,936 | 1.61 ms |
+| Monte Carlo 1k | $3,021 | 1.75 ms |
+| Monte Carlo 5k | $2,829 | 0.78 ms |
+| Monte Carlo 10k | $2,936 | 1.53 ms |
 
 ### 백테스팅 결과
 | 항목 | 수치 |
@@ -483,7 +487,7 @@ python3 run_live.py
 
 ---
 
-## 11. 🗓️ 현재 진행 상황 (2026-05-07 기준)
+## 11. 🗓️ 최종 진행 상황
 
 ### 완료된 항목
 
@@ -504,7 +508,7 @@ python3 run_live.py
 
 - **포트폴리오:** AAPL / MSFT / NVDA / SPY / QQQ, $100,000 균등 투자
 - **99% VaR:** Rolling $2,993 / EWMA $2,489 / MC(10k) $2,936
-- **계산 속도:** Parametric ~0.16–0.19ms, Monte Carlo ~0.47–1.61ms
+- **계산 속도:** Parametric ~0.16–0.19ms, Monte Carlo ~0.78–1.75ms
 - **백테스팅:** 498거래일 중 7번 위반, Kupiec p-value = 0.39 → 모델 통과 ✅
 
 ---
