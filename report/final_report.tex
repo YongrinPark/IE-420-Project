@@ -91,8 +91,10 @@ The central engineering question is: \emph{how does computational cost scale
 with model complexity, and at what accuracy cost does a faster model come?}
 Results are presented for both 95\% and 99\% confidence levels, with
 backtesting conducted via the Kupiec Proportion of Failures (PoF) test.
-A Plotly/Dash interactive dashboard provides a real-time view of portfolio
-value, VaR estimates, exceedances, and latency.
+A Plotly/Dash interactive dashboard provides a replay-based view of portfolio
+value, VaR estimates, exceedances, and latency, and a separate live dashboard
+can fetch prices from Finnhub when an API key is available or fall back to
+\texttt{yfinance}.
 \end{abstract}
 
 \newpage
@@ -292,6 +294,14 @@ pipeline.
         Kupiec PoF test.
   \item[\texttt{src/latency.py}] Timing utilities and latency summary tables.
   \item[\texttt{src/dashboard.py}] Plotly/Dash interactive dashboard.
+  \item[\texttt{src/live\_data.py}] Live price fetch layer using Finnhub when
+        \texttt{FINNHUB\_API\_KEY} is configured, with \texttt{yfinance}
+        fallback when no API key is available.
+  \item[\texttt{src/live\_engine.py}] Background live VaR engine that refreshes
+        prices and recomputes rolling, EWMA, and Monte Carlo VaR estimates.
+  \item[\texttt{src/live\_dashboard.py}] Plotly/Dash live dashboard for current
+        prices, portfolio value, VaR estimates, latency, and weight drift.
+  \item[\texttt{run\_live.py}] Entry point for the live monitoring dashboard.
   \item[\texttt{src/report\_generator.py}] Converts result CSVs to LaTeX
         tables and copies figures into \texttt{report/}.
 \end{description}
@@ -361,8 +371,10 @@ The Kupiec PoF statistic is computed per Equation~\eqref{eq:kupiec}.
 
 \subsection{Data Sources}
 
-All market data are sourced from Yahoo Finance via the \texttt{yfinance}
-Python library \citep{yfinance}.
+Historical and intraday replay data are sourced from Yahoo Finance via the
+\texttt{yfinance} Python library \citep{yfinance}.  The optional live dashboard
+uses Finnhub for real-time quotes when \texttt{FINNHUB\_API\_KEY} is set; if no
+key is available, it automatically falls back to \texttt{yfinance}.
 
 \begin{itemize}
   \item \textbf{Daily prices}: adjusted closing prices from
@@ -370,7 +382,7 @@ Python library \citep{yfinance}.
         (approximately 750 trading days).
   \item \textbf{Intraday prices}: 1-minute OHLCV data for
         \texttt{INTRADAY\_DATE}, filtered to 09:30–16:00 ET
-        (approximately 391 bars per asset).
+        (151 aligned bars per asset in the saved replay dataset).
 \end{itemize}
 
 \subsection{Asset Universe}
@@ -409,7 +421,8 @@ is fully aligned across all five assets.
   \item Python 3.10+
   \item \texttt{numpy} / \texttt{pandas} — numerical core
   \item \texttt{scipy.stats} — normal quantile functions
-  \item \texttt{yfinance} — market data
+  \item \texttt{yfinance} — historical, intraday replay, and fallback market data
+  \item Finnhub REST API — optional live quote source
   \item \texttt{plotly} / \texttt{dash} — interactive dashboard
   \item \texttt{matplotlib} — static report figures
 \end{itemize}
@@ -597,13 +610,15 @@ significance level, suggesting the VaR forecasts are statistically well-calibrat
 
 \subsection{Trade-off Discussion}
 
-The parametric VaR approaches are orders of magnitude faster than Monte
-Carlo simulation.  For a portfolio of $N = 5$ assets:
+The parametric VaR approaches are several times faster than Monte Carlo
+simulation in the measured run.  For a portfolio of $N = 5$ assets:
 \begin{itemize}
   \item Parametric VaR requires one matrix-vector multiply —
-        $\mathcal{O}(N^2)$ — and is essentially instantaneous ($<0.1$ ms).
+        $\mathcal{O}(N^2)$ — and averaged 0.168 ms for rolling covariance
+        and 0.141 ms for EWMA covariance.
   \item Monte Carlo VaR requires generating and evaluating $M$ correlated
-        paths — $\mathcal{O}(MN)$ — scaling linearly in path count.
+        paths — $\mathcal{O}(MN)$ — and measured 1.53 ms for 10,000 paths
+        in the benchmark.
 \end{itemize}
 
 However, parametric VaR inherits the Gaussian assumption, which
@@ -628,7 +643,7 @@ real-time portfolio VaR monitoring system.  Key findings are:
   \item EWMA covariance responds more quickly to market volatility
         regime changes than the equal-weighted rolling estimator.
   \item Monte Carlo VaR scales linearly in path count; at $M = 10{,}000$
-        paths it remains feasible ($\sim$X ms) but requires careful
+        paths it remains feasible ($\sim$1.53 ms) but requires careful
         scheduling in a production system.
   \item Backtesting via the Kupiec test provides a statistically rigorous
         framework for evaluating VaR model calibration.
@@ -651,7 +666,7 @@ real-time portfolio VaR monitoring system.  Key findings are:
 Extensions include: (1) Historical Simulation VaR; (2) Filtered Historical
 Simulation with GARCH volatility scaling; (3) Extreme Value Theory (EVT)
 for tail modelling; (4) parallel GPU-accelerated Monte Carlo; and (5)
-integration with live market data streams.
+persistent live alerting, logging, and API-key based deployment hardening.
 
 % =============================================================================
 \section*{References}
